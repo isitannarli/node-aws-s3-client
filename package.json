@@ -1,0 +1,59 @@
+{
+  "name": "node-aws-s3-client",
+  "version": "1.0.0",
+  "description": "AWS S3 Client for node.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "main": "./build/S3Client.js",
+  "module": "./build/S3Client.mjs",
+  "types": "./build/S3Client.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "import": "./build/S3Client.mjs",
+        "types": "./build/S3Client.d.mts"
+      },
+      "require": {
+        "require": "./build/S3Client.js",
+        "types": "./build/S3Client.d.ts"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check --write .",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "keywords": [
+    "aws",
+    "s3",
+    "client",
+    "aws s3",
+    "nodejs",
+    "javascript",
+    "typescript"
+  ],
+  "author": "Ahmet Işıtan Narlı <ahmetisitannarli@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.688.0",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^22.9.0",
+    "@vitest/coverage-v8": "2.1.4",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
