@@ -5,6 +5,10 @@
   "engines": {
     "node": ">=18"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isitannarli/node-aws-s3-client.git"
+  },
   "files": [
     "build",
     "README.md"
