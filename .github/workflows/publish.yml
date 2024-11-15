@@ -54,7 +54,7 @@ jobs:
         git commit -m "chore: release ${{ env.NEW_VERSION }}"
         git tag ${{ env.NEW_VERSION }}
     - name: Publish
-      run: pnpm publish --access public --tag ${{ env.RELEASE_TAG }}
+      run: pnpm publish --access public --tag ${{ env.RELEASE_TAG }} --no-git-checks
     - name: Push changes to repository
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
