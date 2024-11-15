@@ -5,8 +5,11 @@ export default defineConfig({
   splitting: false,
   sourcemap: false,
   clean: true,
-  // legacyOutput: true,
+  treeshake: true,
   format: ["cjs", "esm"],
   dts: true,
+  bundle: true,
+  noExternal: [/./],
   outDir: "build",
+  cjsInterop: true,
 });

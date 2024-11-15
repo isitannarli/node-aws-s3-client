@@ -3,15 +3,14 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "commonjs",
-    "moduleResolution": "node10",
-    "baseUrl": "./",
-    "outDir": "./",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "outDir": "./build",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "types": ["vitest/globals"]
   },
-  "include": ["./src"],
-  "exclude": ["./node_modules", "./build"]
+  "include": ["./src/**/*.ts"]
 }

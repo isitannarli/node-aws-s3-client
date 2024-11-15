@@ -1,3 +1,4 @@
+/** @module default */
 import fs from "node:fs";
 import path from "node:path";
 import stream from "node:stream";
@@ -12,36 +13,34 @@ import {
   S3,
   type _Object,
 } from "@aws-sdk/client-s3";
-import mime from "mime-types";
-import type { File, S3ClientConfig } from "./S3Client.types";
+import mime from "mime";
+import type { Config, File } from "./S3Client.types";
 
 /**
- * S3Client
- *
  * @class S3Client
  * @classdesc AWS S3 Client for node.js
+ * @property {Config} config - Configuration.
+ * @method upload {Function} - Upload file
+ * @method delete {Function} - Delete file
+ * @method list {Function} - List files
+ * @method download {Function} - Download file
+ * @method setBucket {Function} - Set bucket
  */
 export default class S3Client {
-  /**
-   * @private {S3} client - S3 client instance.
-   */
+  /** @private {S3} client - S3 client instance */
   private client: S3;
 
-  /**
-   * @private {URL} url - URL instance.
-   */
+  /** @private {URL} url - URL instance */
   private url: URL;
 
-  /**
-   * @private {string} bucket - Bucket name.
-   */
+  /** @private {string} bucket - Bucket name */
   private bucket: string | undefined;
 
   /**
    * @constructor
-   * @param {S3ClientConfig} config - Config.
+   * @param {Config} config - Configuration.
    */
-  constructor(private readonly config: S3ClientConfig) {
+  constructor(private readonly config: Config) {
     this.client = new S3({
       region: this.config.region,
       credentials: this.config.credentials,
@@ -51,25 +50,25 @@ export default class S3Client {
   }
 
   /**
-   * urlGenerator
+   * Url generator
    *
-   * @method urlGenerator
-   * @param {string} key Key.
+   * @method
+   * @param {string} pathName - Path name.
    * @private
-   * @returns {string} URL.
+   * @returns {string} - URL.
    */
-  private urlGenerator(key: string): string {
-    this.url.pathname = key;
+  private urlGenerator(pathName: string): string {
+    this.url.pathname = pathName;
 
     return this.url.toString();
   }
 
   /**
-   * check
+   * Check
    *
-   * @method check
+   * @method
    * @private
-   * @throws {Error} Bucket is not set.
+   * @throws {Error} - Bucket is not set.
    * @returns {Promise<void>}.
    */
   private async check(): Promise<void> {
@@ -83,9 +82,9 @@ export default class S3Client {
   /**
    * checkCredentials
    *
-   * @method checkCredentials
+   * @method
    * @private
-   * @throws {Error} Authentication failed.
+   * @throws {Error} - Authentication failed.
    * @returns {Promise<void>}.
    */
   private async checkCredentials(): Promise<void> {
@@ -98,12 +97,12 @@ export default class S3Client {
   }
 
   /**
-   * fileGenerator
+   * File generator
    *
-   * @method fileGenerator
-   * @param {_Object} item Item.
+   * @method
+   * @param {_Object} item - Item.
    * @private
-   * @returns {File | undefined} File.
+   * @returns {File | undefined} - File.
    */
   private fileGenerator(item: _Object): File | undefined {
     if ((item?.Size ?? 0) > 0 && item.Key) {
@@ -111,7 +110,7 @@ export default class S3Client {
         name: item.Key.split("/").pop() ?? "",
         key: item.Key,
         byte: item.Size as number,
-        type: mime.lookup(item.Key) || "unknown",
+        type: mime.getType(item.Key) || "unknown",
         url: this.urlGenerator(item.Key),
         lastModified: new Date(item.LastModified as Date),
       };
@@ -119,12 +118,12 @@ export default class S3Client {
   }
 
   /**
-   * checkIfFileExists
+   * Check if file exists
    *
-   * @method checkIfFileExists
+   * @method
    * @private
-   * @param {string} key Key.
-   * @returns {Promise<boolean>} True if file exists, false otherwise.
+   * @param {string} key - Key.
+   * @returns {Promise<boolean>} - True if file exists, false otherwise.
    */
   private async checkIfFileExists(key: string): Promise<boolean> {
     try {
@@ -140,9 +139,9 @@ export default class S3Client {
   /**
    * setBucket
    *
-   * @method setBucket
-   * @param {string} bucket Bucket name.
-   * @returns {S3Client} S3Client instance.
+   * @method
+   * @param {string} bucket - Bucket name.
+   * @returns {S3Client} - S3Client instance.
    */
   setBucket(bucket: string): S3Client {
     this.bucket = bucket;
@@ -150,38 +149,37 @@ export default class S3Client {
   }
 
   /**
-   * upload
+   * Upload file to S3 bucket.
    *
-   * @method upload
-   * @param {object} options Options.
-   * @param {string} options.file  File path.
-   * @param {string} options.key  Key.
-   * @throws {Error} Failed to upload file.
-   * @returns {Promise<File>} File.
-   *
+   * @method
+   * @param {object} options - Options.
+   * @param {string} options.file - File path.
+   * @param {string} options.destFile - Destination file.
+   * @throws {Error} - Failed to upload file.
+   * @returns {Promise<File>} - File.
    * @example
    * const file = await client.upload({
    *   file: "../example.jpg",
-   *   key: "assets/example.jpg",
+   *   destFile: "assets/example.jpg",
    * });
    */
   async upload(options: {
     file: string;
-    key: string;
+    destFile: string;
   }): Promise<File> {
     try {
       await this.check();
 
-      const { key, file } = options;
+      const { destFile, file } = options;
 
       const fileStream: fs.ReadStream = fs.createReadStream(file);
 
       const contentType =
-        mime.lookup(path.extname(file)) || "application/octet-stream";
+        mime.getType(path.extname(file)) || "application/octet-stream";
 
       const uploadParams = {
         Bucket: this.bucket,
-        Key: key,
+        Key: destFile,
         Body: fileStream,
         ContentType: contentType,
       };
@@ -214,24 +212,23 @@ export default class S3Client {
   }
 
   /**
-   * delete
+   * Delete file from S3 bucket.
    *
-   * @method delete
-   * @param {object} options Options.
-   * @param {string} options.key Key.
-   * @throws {Error} File does not exist.
-   * @throws {Error} Failed to delete file.
+   * @method
+   * @param {object} options - Options.
+   * @param {string} options.file - File.
+   * @throws {Error} - File does not exist.
+   * @throws {Error} - Failed to delete file.
    * @returns {Promise<void>}.
-   *
    * @example
-   * await s3Client.setBucket("bucket").delete({ key: "assets/example.jpeg" });
+   * await s3Client.setBucket("bucket").delete({ file: "assets/example.jpeg" });
    */
-  async delete(options: { key: string }): Promise<void> {
+  async delete(options: { file: string }): Promise<void> {
     try {
-      const { key } = options;
+      const { file } = options;
 
       await this.check();
-      const isFileExists = await this.checkIfFileExists(key);
+      const isFileExists = await this.checkIfFileExists(file);
 
       if (!isFileExists) {
         throw new Error("File does not exist!");
@@ -239,7 +236,7 @@ export default class S3Client {
 
       const command = new DeleteObjectCommand({
         Bucket: this.bucket,
-        Key: key,
+        Key: file,
       });
 
       await this.client.send(command);
@@ -251,13 +248,12 @@ export default class S3Client {
   }
 
   /**
-   * list
+   * List files from S3 bucket.
    *
-   * @method list
-   * @param {object} options Options.
-   * @param {string} options.path Path.
-   * @returns {Promise<File[]>} Files.
-   *
+   * @method
+   * @param {object} options - Options.
+   * @param {string} options.path - Path.
+   * @returns {Promise<File[]>} - Files.
    * @example
    * const files = await s3Client.setBucket("bucket").list({ path: "assets" });
    */
@@ -300,23 +296,22 @@ export default class S3Client {
   }
 
   /**
-   * download
+   * Download file from S3 bucket.
    *
-   * @method download
-   * @param {object} options Options.
-   * @param {string} options.key Key.
-   * @param {string} options.outFile Out file path.
+   * @method
+   * @param {object} options - Options.
+   * @param {string} options.file - File.
+   * @param {string} options.outFile - Out file.
    * @returns {Promise<void>}.
-   *
    * @example
    * await s3Client.setBucket("bucket").download({
-   *   key: "assets/example.jpeg",
+   *   file: "assets/example.jpeg",
    *   outFile: path.join(__dirname, "./example.jpeg"),
    * });
    */
-  async download(options: { key: string; outFile: string }): Promise<void> {
+  async download(options: { file: string; outFile: string }): Promise<void> {
     try {
-      const { key, outFile } = options;
+      const { file, outFile } = options;
 
       await this.check();
 
@@ -330,7 +325,7 @@ export default class S3Client {
         fs.mkdirSync(outDir, { recursive: true });
       }
 
-      const isFileExists = await this.checkIfFileExists(key);
+      const isFileExists = await this.checkIfFileExists(file);
 
       if (!isFileExists) {
         throw new Error("File does not exist!");
@@ -338,7 +333,7 @@ export default class S3Client {
 
       const command = new GetObjectCommand({
         Bucket: this.bucket,
-        Key: key,
+        Key: file,
       });
 
       const response = await this.client.send(command);

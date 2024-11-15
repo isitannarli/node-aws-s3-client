@@ -9,22 +9,19 @@
     "type": "git",
     "url": "git+https://github.com/isitannarli/node-aws-s3-client.git"
   },
-  "files": [
-    "build",
-    "README.md"
-  ],
+  "files": ["build", "README.md"],
   "main": "./build/S3Client.js",
   "module": "./build/S3Client.mjs",
   "types": "./build/S3Client.d.ts",
   "exports": {
     ".": {
       "import": {
-        "import": "./build/S3Client.mjs",
-        "types": "./build/S3Client.d.mts"
+        "types": "./build/S3Client.d.mts",
+        "import": "./build/S3Client.mjs"
       },
       "require": {
-        "require": "./build/S3Client.js",
-        "types": "./build/S3Client.d.ts"
+        "types": "./build/S3Client.d.ts",
+        "require": "./build/S3Client.js"
       }
     }
   },
@@ -47,17 +44,16 @@
   "author": "Ahmet Işıtan Narlı <ahmetisitannarli@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.688.0",
-    "mime-types": "^2.1.35"
+    "@aws-sdk/client-s3": "^3.693.0",
+    "mime": "^4.0.4"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/mime-types": "^2.1.4",
     "@types/node": "^22.9.0",
-    "@vitest/coverage-v8": "2.1.4",
+    "@vitest/coverage-v8": "2.1.5",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.5"
   }
 }

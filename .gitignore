@@ -140,3 +140,6 @@ dist
 # Build directories
 build/
 dist/
+
+# Testing
+example.jpeg

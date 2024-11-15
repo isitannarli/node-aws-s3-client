@@ -1,15 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import utils from "node:util";
-import mime from "mime-types";
+import mime from "mime";
 import { type MockInstance, describe, it, vi } from "vitest";
 import S3Client from "./S3Client";
 import { Region } from "./S3Client.enums";
-import type { File, S3ClientConfig } from "./S3Client.types";
+import type { Config, File } from "./S3Client.types";
 
 const bucketNameMock = "example-bucket";
 
-const config: S3ClientConfig = {
+const config: Config = {
   region: Region.EUCentral1,
   credentials: {
     accessKeyId: "accessKeyId",
@@ -65,7 +65,7 @@ const fileMock: File = {
   name: path.basename(listResponseMock.Contents[1].Key),
   key: listResponseMock.Contents[1].Key,
   byte: listResponseMock.Contents[1].Size,
-  type: mime.lookup(listResponseMock.Contents[1].Key) as string,
+  type: mime.getType(listResponseMock.Contents[1].Key) as string,
   url: cdnUrlInstance.toString(),
   lastModified: listResponseMock.Contents[1].LastModified,
 };
@@ -99,7 +99,7 @@ describe("S3Client", () => {
         await client.list({ path: "assets" });
       };
 
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should list the files when files exist", async ({ expect }) => {
@@ -131,7 +131,7 @@ describe("S3Client", () => {
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should give an error if there is any issue", async ({ expect }) => {
@@ -144,7 +144,7 @@ describe("S3Client", () => {
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
   });
 
@@ -160,17 +160,17 @@ describe("S3Client", () => {
 
     it("should throw the error when bucket not set", async ({ expect }) => {
       const fn = async (): Promise<void> => {
-        await client.delete({ key: "assets/example.jpeg" });
+        await client.delete({ file: "assets/example.jpeg" });
       };
 
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should delete the file", async ({ expect }) => {
       awsSDKClientS3Mock.send.mockImplementation(() => Promise.resolve());
 
       const output = await client.setBucket(bucketNameMock).delete({
-        key: "assets/example.jpeg",
+        file: "assets/example.jpeg",
       });
 
       expect(output).toBeUndefined();
@@ -184,12 +184,12 @@ describe("S3Client", () => {
 
       const fn = async (): Promise<void> => {
         await client.setBucket(bucketNameMock).delete({
-          key: "assets/example.jpeg",
+          file: "assets/example.jpeg",
         });
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should give an error if there is any issue", async ({ expect }) => {
@@ -197,12 +197,12 @@ describe("S3Client", () => {
 
       const fn = async (): Promise<void> => {
         await client.setBucket(bucketNameMock).delete({
-          key: "assets",
+          file: "assets/example.jpeg",
         });
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
   });
 
@@ -211,11 +211,11 @@ describe("S3Client", () => {
       const fn = async (): Promise<void> => {
         await client.upload({
           file: "./example.jpeg",
-          key: "assets/example.jpeg",
+          destFile: "assets/example.jpeg",
         });
       };
 
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should upload the file", async ({ expect }) => {
@@ -227,7 +227,7 @@ describe("S3Client", () => {
 
       const file = await client.setBucket(bucketNameMock).upload({
         file: "./example.jpeg",
-        key: "assets/example.jpeg",
+        destFile: "assets/example.jpeg",
       });
 
       expect(file).toStrictEqual(fileMock);
@@ -240,12 +240,12 @@ describe("S3Client", () => {
       const fn = async (): Promise<void> => {
         await client.setBucket(bucketNameMock).upload({
           file: "./example.jpeg",
-          key: "assets",
+          destFile: "assets/example.jpeg",
         });
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
   });
 
@@ -262,12 +262,12 @@ describe("S3Client", () => {
     it("should throw the error when bucket not set", async ({ expect }) => {
       const fn = async (): Promise<void> => {
         await client.download({
-          key: "assets/example.jpeg",
+          file: "assets/example.jpeg",
           outFile: "./example.jpeg",
         });
       };
 
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should download the file", async ({ expect }) => {
@@ -278,7 +278,7 @@ describe("S3Client", () => {
       );
 
       const output = await client.setBucket(bucketNameMock).download({
-        key: "assets/example.jpeg",
+        file: "assets/example.jpeg",
         outFile: "./example.jpeg",
       });
 
@@ -293,13 +293,13 @@ describe("S3Client", () => {
 
       const fn = async (): Promise<void> => {
         await client.setBucket(bucketNameMock).download({
-          key: "assets/example.jpeg",
+          file: "assets/example.jpeg",
           outFile: "./example.jpeg",
         });
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
 
     it("should give an error if there is any issue", async ({ expect }) => {
@@ -307,13 +307,13 @@ describe("S3Client", () => {
 
       const fn = async (): Promise<void> => {
         await client.setBucket(bucketNameMock).download({
-          key: "assets/example.jpeg",
+          file: "assets/example.jpeg",
           outFile: "./example.jpeg",
         });
       };
 
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
-      expect(fn).rejects.toThrow(Error);
+      await expect(fn).rejects.toThrow(Error);
     });
   });
 });
