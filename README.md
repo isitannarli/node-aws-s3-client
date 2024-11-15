@@ -1,5 +1,9 @@
 # AWS S3 Client for Node.js
 
+![NPM Version](https://img.shields.io/npm/v/node-aws-s3-client?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fnode-aws-s3-client)
+![NPM Bundle Size](https://img.shields.io/bundlephobia/min/node-aws-s3-client?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fnode-aws-s3-client)
+![NPM Downloads](https://img.shields.io/npm/dw/node-aws-s3-client?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fnode-aws-s3-client)
+
 ### Installation
 ```bash
 # npm
