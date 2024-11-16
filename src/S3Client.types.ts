@@ -15,11 +15,13 @@ export interface Credentials {
  * @property {Region} region - AWS region.
  * @property {Credentials} credentials - AWS credentials.
  * @property {string} cdnUrl - CDN URL.
+ * @property {string} [defaultBucket] - Default bucket name.
  */
 export interface Config {
   region: `${Region}`;
   credentials: Credentials;
   cdnUrl: string;
+  defaultBucket?: string;
 }
 
 /**

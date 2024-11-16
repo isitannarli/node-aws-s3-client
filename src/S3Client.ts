@@ -45,6 +45,7 @@ export default class S3Client {
       credentials: this.config.credentials,
     });
 
+    this.bucket = this.config.defaultBucket;
     this.url = new URL(this.config.cdnUrl);
   }
 
@@ -141,6 +142,8 @@ export default class S3Client {
    * @method
    * @param {string} bucket - Bucket name.
    * @returns {S3Client} - S3Client instance.
+   * @example
+   * client.setBucket("example-bucket");
    */
   setBucket(bucket: string): S3Client {
     this.bucket = bucket;
@@ -224,7 +227,7 @@ export default class S3Client {
    * @throws {Error} - Failed to delete file.
    * @returns {Promise<void>}.
    * @example
-   * await s3Client.setBucket("bucket").delete({ file: "assets/example.jpeg" });
+   * await s3Client.delete({ file: "assets/example.jpeg" });
    */
   async delete(options: { file: string }): Promise<void> {
     try {
@@ -258,7 +261,7 @@ export default class S3Client {
    * @param {string} options.path - Path.
    * @returns {Promise<File[]>} - Files.
    * @example
-   * const files = await s3Client.setBucket("bucket").list({ path: "assets" });
+   * const files = await s3Client.list({ path: "assets" });
    */
   async list(options?: { path?: string }): Promise<File[]> {
     try {
@@ -307,7 +310,7 @@ export default class S3Client {
    * @param {string} options.outFile - Out file.
    * @returns {Promise<void>}.
    * @example
-   * await s3Client.setBucket("bucket").download({
+   * await s3Client.download({
    *   file: "assets/example.jpeg",
    *   outFile: path.join(__dirname, "./example.jpeg"),
    * });

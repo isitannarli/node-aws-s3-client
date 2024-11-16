@@ -93,6 +93,48 @@ vi.spyOn(fs, "statSync").mockReturnValue({
 describe("S3Client", () => {
   const client = new S3Client(config);
 
+  describe("setBucket method", () => {
+    it("should not throw the error when the default bucket is set", async ({
+      expect,
+    }) => {
+      const newClient = new S3Client({
+        ...config,
+        defaultBucket: bucketNameMock,
+      });
+
+      awsSDKClientS3Mock.send.mockImplementation(() =>
+        Promise.resolve(listResponseMock),
+      );
+
+      const fn = async (): Promise<void> => {
+        await newClient.list({ path: "assets" });
+      };
+
+      await expect(fn).not.toThrow(Error);
+    });
+
+    it("should change the current bucket when setBucket method is used", async ({
+      expect,
+    }) => {
+      const newClient = new S3Client({
+        ...config,
+        defaultBucket: bucketNameMock,
+      });
+
+      awsSDKClientS3Mock.send.mockImplementation(() =>
+        Promise.resolve(listResponseMock),
+      );
+
+      // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+      expect(newClient["bucket"]).toBe(bucketNameMock);
+
+      newClient.setBucket("new-bucket");
+
+      // biome-ignore lint/complexity/useLiteralKeys: <explanation>
+      expect(newClient["bucket"]).toBe("new-bucket");
+    });
+  });
+
   describe("list method", () => {
     it("should throw the error when bucket not set", async ({ expect }) => {
       const fn = async (): Promise<void> => {
