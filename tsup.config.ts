@@ -11,5 +11,5 @@ export default defineConfig({
   bundle: true,
   noExternal: [/./],
   outDir: "build",
-  cjsInterop: true,
+  // cjsInterop: true,
 });

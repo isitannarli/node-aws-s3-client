@@ -29,6 +29,7 @@
     }
   },
   "scripts": {
+    "watch": "tsup --watch",
     "build": "tsup",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
