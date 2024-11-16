@@ -1,6 +1,6 @@
 {
   "name": "node-aws-s3-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AWS S3 Client for node.js",
   "engines": {
     "node": ">=18"
