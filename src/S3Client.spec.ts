@@ -218,7 +218,7 @@ describe("S3Client", () => {
       await expect(fn).rejects.toThrow(Error);
     });
 
-    it("should upload the file", async ({ expect }) => {
+    it("should upload the file as a file path", async ({ expect }) => {
       awsSDKClientS3Mock.send.mockImplementation(() =>
         Promise.resolve({
           LastModified: listResponseMock.Contents[1].LastModified,
@@ -231,6 +231,31 @@ describe("S3Client", () => {
       });
 
       expect(file).toStrictEqual(fileMock);
+      expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
+    });
+
+    it("should upload the file as a buffer", async ({ expect }) => {
+      awsSDKClientS3Mock.send.mockImplementation(() =>
+        Promise.resolve({
+          LastModified: listResponseMock.Contents[1].LastModified,
+        }),
+      );
+
+      const fileBuffer = Buffer.from("EXAMPLE", "utf-8");
+
+      const file = await client.setBucket(bucketNameMock).upload({
+        file: fileBuffer,
+        destFile: "assets/example.txt",
+      });
+
+      expect(file).toStrictEqual({
+        name: "example.txt",
+        key: "assets/example.txt",
+        type: "text/plain",
+        byte: fileBuffer.byteLength,
+        lastModified: fileMock.lastModified,
+        url: "https://cdn.example.com/assets/example.txt",
+      });
       expect(awsSDKClientS3Mock.send).toHaveBeenCalled();
     });
 

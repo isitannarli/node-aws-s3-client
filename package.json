@@ -9,10 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/isitannarli/node-aws-s3-client.git"
   },
-  "files": [
-    "build",
-    "README.md"
-  ],
+  "files": ["build", "README.md"],
   "main": "./build/S3Client.js",
   "module": "./build/S3Client.mjs",
   "types": "./build/S3Client.d.ts",

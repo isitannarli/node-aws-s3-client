@@ -44,6 +44,13 @@ const uploadedFile = await s3Client
     file: path.join(__dirname, "../example.jpeg"),
     destFile: "assets/example.jpeg",
   });
+
+ const uploadedFileTwo = await s3Client
+  .setBucket("bucket")
+  .upload({
+    file: Buffer.from("EXAMPLE", "utf-8"),
+    destFile: "assets/example.txt",
+  });
 ```
 **List files**
 ```typescript

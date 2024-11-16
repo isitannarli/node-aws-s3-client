@@ -153,7 +153,7 @@ export default class S3Client {
    *
    * @method
    * @param {object} options - Options.
-   * @param {string} options.file - File path.
+   * @param {string | Buffer} options.file - File path or File buffer.
    * @param {string} options.destFile - Destination file.
    * @throws {Error} - Failed to upload file.
    * @returns {Promise<File>} - File.
@@ -162,25 +162,29 @@ export default class S3Client {
    *   file: "../example.jpg",
    *   destFile: "assets/example.jpg",
    * });
+   *
+   * const fileTwo = await client.upload({
+   *   file: Buffer.from("EXAMPLE", "utf-8"),
+   *   destFile: "assets/example.txt",
+   * });
    */
   async upload(options: {
-    file: string;
+    file: string | Buffer;
     destFile: string;
   }): Promise<File> {
     try {
       await this.check();
 
-      const { destFile, file } = options;
-
-      const fileStream: fs.ReadStream = fs.createReadStream(file);
+      const { file, destFile } = options;
 
       const contentType =
-        mime.getType(path.extname(file)) || "application/octet-stream";
+        mime.getType(path.extname(file instanceof Buffer ? destFile : file)) ||
+        "application/octet-stream";
 
       const uploadParams = {
         Bucket: this.bucket,
         Key: destFile,
-        Body: fileStream,
+        Body: file instanceof Buffer ? file : fs.createReadStream(file),
         ContentType: contentType,
       };
 
@@ -197,7 +201,7 @@ export default class S3Client {
 
       const fileResult = this.fileGenerator({
         Key: uploadParams.Key,
-        Size: fs.statSync(file).size,
+        Size: file instanceof Buffer ? file.byteLength : fs.statSync(file).size,
         LastModified: headObjectCommandResponse.LastModified,
       }) as File;
 
